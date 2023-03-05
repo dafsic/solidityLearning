@@ -29,18 +29,30 @@ contract Pearl is IERC20 {
     }
 
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
-        uint256 allowBalance = _allowance[from][to];
-        require(allowBalance >= amount, "ERC20: transferFrom amount exceeds balance");
+        uint256 allowBalance = _allowance[from][msg.sender];
+        require(allowBalance >= amount, "ERC20: transferFrom amount exceeds balance 1");
 
-        uint256 senderBalance = _balances[msg.sender];
-        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        uint256 senderBalance = _balances[from];
+        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance 2");
 
-        _allowance[from][to] = allowBalance - amount;
+        _allowance[from][msg.sender] = allowBalance - amount;
         _balances[from] = senderBalance - amount;
         _balances[to] = _balances[to] + amount;
 
         emit Transfer(from, to, amount);
         return true;
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return _totalSupply;
+    }
+
+    function balanceOf(address account) external view returns (uint256) {
+        return _balances[account];
+    }
+
+    function allowance(address owner, address spender) external view returns (uint256) {
+        return _allowance[owner][spender];
     }
 
     function mint(uint256 amount) external {
