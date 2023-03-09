@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 //import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
+error InsufficientBalance();
+
 contract Pearl is IERC20 {
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -14,7 +16,11 @@ contract Pearl is IERC20 {
 
     function transfer(address to, uint256 amount) external returns (bool) {
         uint256 senderBalance = _balances[msg.sender];
-        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        //require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        if (senderBalance < amount) {
+            revert InsufficientBalance();
+        }
+
         _balances[msg.sender] = senderBalance - amount;
         _balances[to] = _balances[to] + amount;
 

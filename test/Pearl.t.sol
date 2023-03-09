@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/Pearl.sol";
-import {console} from "forge-std/console.sol";
+import {console2} from "forge-std/console2.sol";
 
 contract PrealTest is Test {
     Pearl public pearl;
@@ -19,7 +19,6 @@ contract PrealTest is Test {
     function testTransfer() public {
         pearl.mint(10000);
         pearl.transfer(alice, 5000);
-
         //assertEq(pearl.balanceOf(alice), 5000);
         assertEq(pearl.balanceOf(address(this)), 5000);
     }
@@ -31,11 +30,19 @@ contract PrealTest is Test {
         assertEq(pearl.allowance(address(this), bob), 1000);
     }
 
+    //fuzzing
     function testTransferFrom(uint256 x) public {
         pearl.mint(x);
         pearl.approve(bob, x / 2);
         vm.prank(bob);
         pearl.transferFrom(address(this), alice, x / 2);
         assertEq(pearl.balanceOf(address(this)), x - x / 2);
+    }
+
+    function testCannotTransfer() public {
+        pearl.mint(10000);
+        console2.log(pearl.balanceOf(address(this)));
+        vm.expectRevert(InsufficientBalance.selector);
+        pearl.transfer(alice, 50000);
     }
 }
